@@ -43,17 +43,18 @@ class NeuralNetwork:
                 gray = img.convert('L')
                 gray.save(path2 + '//' + file, 'png')
 
-        for id_img in labels.Id_Imagem:
+        for id_img in labels['Id_Imagem']:
             try:
                 result = plt.imread(path2 + '//' + id_img)
             except Exception as e:
-                print(str(e))
+                print(e)
             dataset_result.append(result)
 
-        # self.x_train = dataset_result[0:110]
-        # self.x_test = dataset_result[110:150]
-        # self.y_train = labels.saida[0:110]
-        # self.y_test = labels.saida[]
+        self.x_train = dataset_result[0:110]
+        self.x_test = dataset_result[110:150]
+
+        self.y_train = list(labels.saida[0:110])
+        self.y_test = list(labels.saida[110:150])
 
     def compile_model(self):
         input_shape = (180, 180, 1)
