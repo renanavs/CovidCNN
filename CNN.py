@@ -1,94 +1,110 @@
-import keras
-from keras import utils as keras_utils
-from keras.optimizers import SGD, Adam, RMSprop, Adamax
-from keras.models import Sequential
+import os
+
+import matplotlib.pyplot as plt
+import pandas as pd
+from PIL import Image
+import tensorflow_addons as tfa
 from keras.layers.convolutional import Conv2D, MaxPooling2D
 from keras.layers.core import Dense, Flatten, Activation, Dropout
-import pandas as pd
-import matplotlib.pyplot as plt
-import os
-from PIL import Image
+from keras.models import Sequential
+from keras.optimizers import Adamax
 
 # from keras.utils import np_utils
 # from keras import backend as K
 # import numpy as np
 
-NUM_CLASSES = 2
-INIT_LR = 5e-2
-dataset_result = []
-expected_results = []
-classes = ['Positivo', 'Negativo']
-dataset_train = []
-dataset_pred = []
 
-print('COMEÇOOOU')
+class NeuralNetwork:
 
+    def __init__(self):
+        self.x_train = []
+        self.x_test = []
+        self.y_test = []
+        self.y_train = []
+        self.NUM_CLASSES = 2  # POSITIVO, NEGATIVO
+        self.learning_rate = 5e-2  # taxa de aprendizagem constante = 0.05
+        self.dataset_result = []
+        self.expected_results = []
+        self.classes = ['Positivo', 'Negativo']
 
-def pre_process():
-    path1 = 'dataset/'
-    path2 = 'dataset_resized/'
-    listing = os.listdir(path1)
-    inlist = os.listdir(path2)
-    labels = pd.read_csv('labels.csv', sep=';')
-    expected_results = labels.values
+    def pre_process(self):
+        path1 = 'dataset/'
+        path2 = 'dataset_resized/'
+        listing = os.listdir(path1)
+        inlist = os.listdir(path2)
+        dataset_result = []
+        labels = pd.read_csv('labels.csv', sep=';')
+        # expected_results = labels.values
 
-    for file in listing:
-        im = Image.open(path1 + '//' + file)
-        img = im.resize((180, 180))
-        gray = img.convert('L')
-        gray.save(path2 + '//' + file, 'png')
+        if len(inlist) == 0:
+            for file in listing:
+                im = Image.open(path1 + '//' + file)
+                img = im.resize((180, 180))
+                gray = img.convert('L')
+                gray.save(path2 + '//' + file, 'png')
 
-    for file in inlist:
-        result = plt.imread(path2 + '//' + file)
-        dataset_result.append(result)
+        for id_img in labels.Id_Imagem:
+            try:
+                result = plt.imread(path2 + '//' + id_img)
+            except Exception as e:
+                print(str(e))
+            dataset_result.append(result)
 
+        # self.x_train = dataset_result[0:110]
+        # self.x_test = dataset_result[110:150]
+        # self.y_train = labels.saida[0:110]
+        # self.y_test = labels.saida[]
 
-def compile_model():
-    model = Sequential()
-    model.add(Conv2D(filters=16, kernel_size=(3, 3), padding="same", input_shape=(32, 32, 3)))
-    model.add(Activation('relu'))
-    model.add(Conv2D(filters=32, kernel_size=(3, 3), padding="same"))
-    model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.25))
-    model.add(Conv2D(filters=32, kernel_size=(3, 3), padding="same"))
-    model.add(Activation('relu'))
-    model.add(Conv2D(filters=64, kernel_size=(3, 3), padding="same"))
-    model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.25))
-    model.add(Flatten())
-    model.add(Dense(256))
-    model.add(Activation('relu'))
-    model.add(Dropout(0.5))
-    model.add(Dense(NUM_CLASSES))  # the last layer with neuron for each class
-    model.add(Activation("softmax"))  # output probabilities
+    def compile_model(self):
+        input_shape = (180, 180, 1)
+        # CNN
+        model = Sequential()
+        model.add(Conv2D(filters=16, kernel_size=(3, 3), padding="same", input_shape=input_shape))
+        model.add(Activation('relu'))
+        model.add(Conv2D(filters=32, kernel_size=(3, 3), padding="same"))
+        model.add(Activation('relu'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+        model.add(Dropout(0.25))
+        model.add(Conv2D(filters=32, kernel_size=(3, 3), padding="same"))
+        model.add(Activation('relu'))
+        # model.add(Conv2D(filters=64, kernel_size=(3, 3), padding="same"))
+        # model.add(Activation('relu'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+        model.add(Dropout(0.25))
+        # MLP
+        model.add(Flatten())
+        model.add(Dense(256))
+        model.add(Activation('relu'))
+        model.add(Dropout(0.5))
+        model.add(Dense(self.NUM_CLASSES))
+        model.add(Activation("softmax"))
 
-    return model
+        model.compile(loss='categorical_crossentropy', optimizer=Adamax(lr=self.learning_rate), metrics=['accuracy'])
+        model.summary()
 
-
-def train_model(x_train2, y_train2, x_test2, y_test2):
-    model = compile_model()
-    model.summary()
-    model.compile(loss='categorical_crossentropy', optimizer=Adamax(lr=INIT_LR), metrics=['accuracy'])
-    model.fit(
-        x_train2, y_train2,  # prepared data
-        batch_size=6,
-        epochs=10000,
-        callbacks=[
-            keras.callbacks.LearningRateScheduler(lr_scheduler),
-            LrHistory(),
-            keras_utils.TqdmProgressCallback(),
-            keras_utils.ModelSaveCallback(model_filename)
-        ],
-        validation_data=(x_test2, y_test2),
-        shuffle=True,
-        verbose=0,
-        initial_epoch=0
-    )
+        return model
 
 
-pre_process()
+    def train_model(self):
+        model = self.compile_model()
+        model.fit(
+            self.x_train, self.y_train,  # prepared data
+            batch_size=6,
+            epochs=10000,
+            callbacks=[
+                # keras.callbacks.LearningRateScheduler(lr_scheduler),
+                # LrHistory(),
+                tfa.callbacks.TQDMProgressBar(),
+                # keras_utils.ModelSaveCallback(model_filename)
+            ],
+            validation_data=(self.x_test, self.y_test),
+            shuffle=True,
+            verbose=0,
+            initial_epoch=0
+        )
 
-# TrainModel()
-# (x_train, y_train), (x_test, y_test) = cifar10.load_data()
+
+if __name__ == "__main__":
+    nn = NeuralNetwork()
+    nn.pre_process() #carregar inputs
+    nn.train_model() # obs.: já invoca o compile model em seu body
