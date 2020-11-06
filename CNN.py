@@ -1,15 +1,17 @@
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import os
-
-from keras.utils import np_utils
+import keras
+from keras import utils as keras_utils
 from keras.optimizers import SGD, Adam, RMSprop, Adamax
 from keras.models import Sequential
 from keras.layers.convolutional import Conv2D, MaxPooling2D
 from keras.layers.core import Dense, Flatten, Activation, Dropout
-from keras import backend as K
+import pandas as pd
+import matplotlib.pyplot as plt
+import os
 from PIL import Image
+
+# from keras.utils import np_utils
+# from keras import backend as K
+# import numpy as np
 
 NUM_CLASSES = 2
 INIT_LR = 5e-2
@@ -20,6 +22,8 @@ dataset_train = []
 dataset_pred = []
 
 print('COMEÇOOOU')
+
+
 def pre_process():
     path1 = 'dataset/'
     path2 = 'dataset_resized/'
@@ -63,23 +67,25 @@ def compile_model():
     return model
 
 
-# def TrainModel():
-#  model = CompileModel()
-#  model.summary()
-#  model.compile(loss='categorical_crossentropy', optimizer=Adamax(lr=INIT_LR),metrics=['accuracy'])
-#  model.fit(
-#    x_train2, y_train2,  # prepared data
-#    batch_size=BATCH_SIZE,
-#    epochs=EPOCHS,
-#    callbacks=[keras.callbacks.LearningRateScheduler(lr_scheduler),
-#               LrHistory(),
-#               keras_utils.TqdmProgressCallback(),
-#               keras_utils.ModelSaveCallback(model_filename)],
-#    validation_data=(x_test2, y_test2),
-#    shuffle=True,
-#    verbose=0,
-#    initial_epoch=last_finished_epoch or 0
-# )
+def train_model(x_train2, y_train2, x_test2, y_test2):
+    model = compile_model()
+    model.summary()
+    model.compile(loss='categorical_crossentropy', optimizer=Adamax(lr=INIT_LR), metrics=['accuracy'])
+    model.fit(
+        x_train2, y_train2,  # prepared data
+        batch_size=6,
+        epochs=10000,
+        callbacks=[
+            keras.callbacks.LearningRateScheduler(lr_scheduler),
+            LrHistory(),
+            keras_utils.TqdmProgressCallback(),
+            keras_utils.ModelSaveCallback(model_filename)
+        ],
+        validation_data=(x_test2, y_test2),
+        shuffle=True,
+        verbose=0,
+        initial_epoch=0
+    )
 
 
 pre_process()
