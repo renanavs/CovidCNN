@@ -8,10 +8,10 @@ from keras.layers.convolutional import Conv2D, MaxPooling2D
 from keras.layers.core import Dense, Flatten, Activation, Dropout
 from keras.models import Sequential
 from keras.optimizers import Adamax
+import numpy as np
 
 # from keras.utils import np_utils
 # from keras import backend as K
-# import numpy as np
 
 
 class NeuralNetwork:
@@ -50,11 +50,11 @@ class NeuralNetwork:
                 print(e)
             dataset_result.append(result)
 
-        self.x_train = dataset_result[0:110]
-        self.x_test = dataset_result[110:150]
+        self.x_train = np.array(dataset_result[0:110])
+        self.x_test = np.array(dataset_result[110:150])
 
-        self.y_train = list(labels.saida[0:110])
-        self.y_test = list(labels.saida[110:150])
+        self.y_train = np.array(labels.saida[0:110])
+        self.y_test = np.array(labels.saida[110:150])
 
     def compile_model(self):
         input_shape = (180, 180, 1)
@@ -77,8 +77,8 @@ class NeuralNetwork:
         model.add(Dense(256))
         model.add(Activation('relu'))
         model.add(Dropout(0.5))
-        model.add(Dense(self.NUM_CLASSES))
-        model.add(Activation("softmax"))
+        model.add(Dense(1))
+        model.add(Activation("sigmoid"))
 
         model.compile(loss='categorical_crossentropy', optimizer=Adamax(lr=self.learning_rate), metrics=['accuracy'])
         model.summary()
@@ -88,6 +88,13 @@ class NeuralNetwork:
 
     def train_model(self):
         model = self.compile_model()
+
+        self.x_train = self.x_train.reshape(-1, 180, 180, 1)
+        self.y_train = self.y_train.reshape(-1, 1)
+
+        self.x_test = self.x_test.reshape(-1, 180, 180, 1)
+        self.y_test = self.y_test.reshape(-1, 1)
+
         model.fit(
             self.x_train, self.y_train,  # prepared data
             batch_size=6,
