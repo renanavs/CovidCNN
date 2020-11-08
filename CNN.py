@@ -10,7 +10,6 @@ from keras.layers.core import Dense, Flatten, Activation, Dropout
 from keras.models import Sequential
 from keras.optimizers import Adagrad
 import numpy as np
-from tensorflow.python.keras.layers import BatchNormalization, AveragePooling2D, GlobalAveragePooling2D
 
 
 class NeuralNetwork:
