@@ -11,9 +11,6 @@ from keras.models import Sequential
 from keras.optimizers import Adam
 import numpy as np
 
-# from keras.utils import np_utils
-# from keras import backend as K
-
 
 class NeuralNetwork:
 
@@ -23,7 +20,7 @@ class NeuralNetwork:
         self.y_test = []
         self.y_train = []
         self.NUM_CLASSES = 2  # POSITIVO, NEGATIVO
-        self.learning_rate = 1e-5  # taxa de aprendizagem constante = 0.05
+        self.learning_rate = 1e-5  # taxa de aprendizagem constante
         self.dataset_result = []
         self.expected_results = []
         self.classes = ['Positivo', 'Negativo']
@@ -122,12 +119,9 @@ class NeuralNetwork:
 
 
 def execute_model():
-    if __name__ == "__main__":
-        neural_net = NeuralNetwork()
-        neural_net.pre_process()  # carregar inputs
-        neural_net.train_model()  # obs.: já invoca o compile model em seu body
+    neural_net = NeuralNetwork()
+    neural_net.pre_process()  # carregar inputs
+    neural_net.train_model()  # obs.: já invoca o compile model em seu body
 
-
-nn = NeuralNetwork()
-nn.pre_process()
-nn.evaluate_model()
+if __name__ == "__main__":
+    execute_model()
