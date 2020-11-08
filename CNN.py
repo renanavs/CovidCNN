@@ -23,7 +23,7 @@ class NeuralNetwork:
         self.y_test = []
         self.y_train = []
         self.NUM_CLASSES = 2  # POSITIVO, NEGATIVO
-        self.learning_rate = 1e-5 # taxa de aprendizagem constante = 0.05
+        self.learning_rate = 1e-5  # taxa de aprendizagem constante = 0.05
         self.dataset_result = []
         self.expected_results = []
         self.classes = ['Positivo', 'Negativo']
@@ -90,6 +90,12 @@ class NeuralNetwork:
 
         return model
 
+    def evaluate_model(self):
+        model = self.compile_model()
+        self.x_test = self.x_test[2].reshape(-1, 180, 180, 1)
+        predict_value = model.predict(self.x_test)
+        print(predict_value)
+
     def train_model(self):
         model = self.compile_model()
 
@@ -102,9 +108,9 @@ class NeuralNetwork:
         model.fit(
             self.x_train, self.y_train,  # prepared data
             batch_size=6,
-            epochs=100,
+            epochs=2,
             callbacks=[
-                keras.callbacks.ModelCheckpoint('model_checkpoint', save_freq=20),
+                keras.callbacks.ModelCheckpoint('model_checkpoint', save_weights_only=True, save_freq=20),
                 tfa.callbacks.TQDMProgressBar()
             ],
             validation_data=(self.x_test, self.y_test),
@@ -112,12 +118,16 @@ class NeuralNetwork:
             verbose=0,
             initial_epoch=0
         )
+        model.save('my_model.h5')
 
 
 def execute_model():
     if __name__ == "__main__":
-        nn = NeuralNetwork()
-        nn.pre_process() #carregar inputs
-        nn.train_model() # obs.: já invoca o compile model em seu body
+        neural_net = NeuralNetwork()
+        neural_net.pre_process()  # carregar inputs
+        neural_net.train_model()  # obs.: já invoca o compile model em seu body
 
-execute_model()
+
+nn = NeuralNetwork()
+nn.pre_process()
+nn.evaluate_model()
