@@ -7,7 +7,7 @@ import tensorflow_addons as tfa
 from keras.layers.convolutional import Conv2D, MaxPooling2D
 from keras.layers.core import Dense, Flatten, Activation, Dropout
 from keras.models import Sequential
-from keras.optimizers import Adamax
+from keras.optimizers import Adam
 import numpy as np
 
 # from keras.utils import np_utils
@@ -31,7 +31,11 @@ class NeuralNetwork:
         path1 = 'dataset/'
         path2 = 'dataset_resized/'
         listing = os.listdir(path1)
-        inlist = os.listdir(path2)
+        if not os.path.isdir(path2):
+            os.mkdir(path2)
+            inlist = os.listdir(path2)
+        else:
+            inlist = os.listdir(path2)
         dataset_result = []
         labels = pd.read_csv('labels.csv', sep=';')
         # expected_results = labels.values
@@ -80,11 +84,10 @@ class NeuralNetwork:
         model.add(Dense(1))
         model.add(Activation("sigmoid"))
 
-        model.compile(loss='categorical_crossentropy', optimizer=Adamax(lr=self.learning_rate), metrics=['accuracy'])
+        model.compile(loss='binary_crossentropy', optimizer=Adam(lr=self.learning_rate), metrics=['accuracy'])
         model.summary()
 
         return model
-
 
     def train_model(self):
         model = self.compile_model()
@@ -98,7 +101,7 @@ class NeuralNetwork:
         model.fit(
             self.x_train, self.y_train,  # prepared data
             batch_size=6,
-            epochs=10000,
+            epochs=100,
             callbacks=[
                 # keras.callbacks.LearningRateScheduler(lr_scheduler),
                 # LrHistory(),
