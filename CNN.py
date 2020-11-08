@@ -8,7 +8,7 @@ import tensorflow_addons as tfa
 from keras.layers.convolutional import Conv2D, MaxPooling2D
 from keras.layers.core import Dense, Flatten, Activation, Dropout
 from keras.models import Sequential
-from keras.optimizers import Adam
+from keras.optimizers import Adagrad
 import numpy as np
 from tensorflow.python.keras.layers import BatchNormalization, AveragePooling2D, GlobalAveragePooling2D
 
@@ -22,8 +22,7 @@ class NeuralNetwork:
         self.y_train = []
         self.x_evaluate_test = []
         self.y_evaluate_test = []
-        self.NUM_CLASSES = 2  # POSITIVO, NEGATIVO
-        self.learning_rate = 1e-5  # taxa de aprendizagem constante
+        self.learning_rate = 5e-3  # taxa de aprendizagem constante
         self.dataset_result = []
         self.expected_results = []
         self.classes = ['Positivo', 'Negativo']
@@ -45,83 +44,98 @@ class NeuralNetwork:
         if len(inlist) == 0:
             for file in listing:
                 im = Image.open(path1 + '//' + file)
-                img = im.resize((256, 256))
+                img = im.resize((200, 200))
                 gray = img.convert('L')
                 gray.save(path2 + '//' + file, 'png')
 
         for id_img in labels['Id_Imagem']:
             try:
                 result = plt.imread(path2 + '//' + id_img)
+                dataset_result.append(result)
             except Exception as e:
                 print(e)
-            dataset_result.append(result)
 
         self.x_train = np.array(dataset_result[0:110])
         self.x_test = np.array(dataset_result[110:150])
-        self.x_evaluate_test = np.array(dataset_result[150:160])
+        self.x_evaluate_test = np.array(dataset_result[100:120])
 
         self.y_train = np.array(labels.saida[0:110])
         self.y_test = np.array(labels.saida[110:150])
-        self.y_evaluate_test = np.array(labels.saida[150:160])
+        self.y_evaluate_test = np.array(labels.saida[100:120])
 
     def compile_model(self):
         # CNN
         model = Sequential()
-        # model.add(Conv2D(filters=16, kernel_size=(3, 3), padding="same", input_shape=input_shape))
-        # model.add(Activation('relu'))
-        # model.add(Conv2D(filters=32, kernel_size=(3, 3), padding="same"))
-        # model.add(Activation('relu'))
-        # model.add(MaxPooling2D(pool_size=(2, 2)))
-        # model.add(Dropout(0.25))
-        # model.add(Conv2D(filters=32, kernel_size=(3, 3), padding="same"))
-        # model.add(Activation('relu'))
-        # # model.add(Conv2D(filters=64, kernel_size=(3, 3), padding="same"))
-        # # model.add(Activation('relu'))
-        # model.add(MaxPooling2D(pool_size=(2, 2)))
-        # model.add(Dropout(0.25))
-        # # MLP
-        # model.add(Flatten())
-        # model.add(Dense(256))
-        # model.add(Activation('relu'))
-        # model.add(Dropout(0.5))
-        # model.add(Dense(1))
-        # model.add(Activation("sigmoid"))
-        # model.compile(loss='binary_crossentropy', optimizer=Adam(lr=self.learning_rate), metrics=['accuracy'])
-        #         # model.summary()
-        model.add(Conv2D(32, (5, 5), strides=(1, 1), input_shape=(256, 256, 1)))
-        model.add(BatchNormalization(axis=3))
+        # 1 conv
+        model.add(Conv2D(16, (3, 3), input_shape=(200, 200, 1)))
         model.add(Activation('relu'))
         model.add(MaxPooling2D((2, 2)))
-        model.add(Conv2D(64, (3, 3), strides=(1, 1)))
+        # 2 conv
+        model.add(Conv2D(32, (3, 3)))
         model.add(Activation('relu'))
-        model.add(AveragePooling2D((3, 3)))
-        model.add(GlobalAveragePooling2D())
-        model.add(Dense(300, activation="relu"))
-        model.add(Dropout(0.5))
-        model.add(Dense(1, activation='sigmoid'))
-        model.compile(loss='binary_crossentropy', optimizer=Adam(lr=self.learning_rate), metrics=['accuracy'])
+        model.add(MaxPooling2D((2, 2)))
+        # 3 conv
+        model.add(Conv2D(64, (3, 3)))
+        model.add(Activation('relu'))
+        model.add(MaxPooling2D((2, 2)))
+        # 4 conv
+        model.add(Conv2D(64, (3, 3)))
+        model.add(Activation('relu'))
+        model.add(MaxPooling2D((2, 2)))
+        # 5 conv
+        model.add(Conv2D(64, (3, 3)))
+        model.add(Activation('relu'))
+        model.add(MaxPooling2D((2, 2)))
+        # model.add(Dropout(0.25))
+        # MLP
+        model.add(Flatten())
+        model.add(Dense(512))
+        model.add(Activation('relu'))
+        # model.add(Dropout(0.25))
+        model.add(Dense(1))
+        model.add(Activation("sigmoid"))
+        model.compile(loss='binary_crossentropy', optimizer=Adagrad(lr=self.learning_rate), metrics=['accuracy'])
+        # model.add(Conv2D(16, (3, 3), padding="same", input_shape=(200, 200, 1)))
+        # model.add(Activation('relu'))
+        # model.add(Conv2D(32, (3, 3), padding="same"))
+        # model.add(Activation('relu'))
+        # model.add(MaxPooling2D((2, 2)))
+        # model.add(Conv2D(64, (3, 3), padding="same"))
+        # model.add(Activation('relu'))
+        # model.add(AveragePooling2D((3, 3)))
+        # model.add(GlobalAveragePooling2D())
+        # model.add(Dense(200, activation="relu"))
+        # model.add(Dropout(0.5))
+        # model.add(Dense(1, activation='sigmoid'))
+        # model.compile(loss='binary_crossentropy', optimizer=Adam(lr=self.learning_rate), metrics=['accuracy'])
         model.summary()
         self.model = model
 
     def evaluate_model(self):
         model = self.model
-        predict_value = model.predict(self.x_evaluate_test.reshape(-1, 256, 256, 1))
-        print(predict_value)
-        print(self.y_evaluate_test)
+        evaluate = model.evaluate(self.x_evaluate_test.reshape(-1, 200, 200, 1), self.y_evaluate_test.reshape(-1, 1))
+        print(evaluate)
+
+    def predict_model(self, id_img):
+        imread = plt.imread('dataset_resized//' + id_img)
+        model = self.model
+        x_predict = np.array(imread).reshape(-1, 200, 200, 1)
+        predict = model.predict(x_predict)
+        print(predict)
 
     def train_model(self):
         model = self.model
 
-        self.x_train = self.x_train.reshape(-1, 256, 256, 1)
+        self.x_train = self.x_train.reshape(-1, 200, 200, 1)
         self.y_train = self.y_train.reshape(-1, 1)
 
-        self.x_test = self.x_test.reshape(-1, 256, 256, 1)
+        self.x_test = self.x_test.reshape(-1, 200, 200, 1)
         self.y_test = self.y_test.reshape(-1, 1)
 
         model.fit(
-            self.x_train, self.y_train,  # prepared data
-            batch_size=6,
-            epochs=10,
+            self.x_train, self.y_train,
+            batch_size=16,
+            epochs=50,
             callbacks=[
                 keras.callbacks.ModelCheckpoint('model_checkpoint', save_weights_only=True, save_freq=20),
                 tfa.callbacks.TQDMProgressBar()
@@ -131,15 +145,21 @@ class NeuralNetwork:
             verbose=0,
             initial_epoch=0
         )
-        model.save('my_model.h5')
+        # model.save('my_model.h5')
 
 
 def execute_model():
     neural_net = NeuralNetwork()
     neural_net.pre_process()  # carregar inputs
     neural_net.compile_model()
-    neural_net.train_model()  # obs.: já invoca o compile model em seu body
+    neural_net.train_model()  # obs.: já invoca o compile model em seu body[
+    print("evaluate model: ")
     neural_net.evaluate_model()
+    print("predict test")
+    neural_net.predict_model("01E392EE-69F9-4E33-BFCE-E5C968654078.jpeg") # 1
+    neural_net.predict_model("IM-0001-0001.jpeg") # 0
+    neural_net.predict_model("NORMAL2-IM-0073-0001.jpeg") # 0
+    neural_net.predict_model("IMG-COVID-00014.jpg") # 1
 
 
 if __name__ == "__main__":
