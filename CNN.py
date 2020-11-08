@@ -1,6 +1,7 @@
 import os
 
 import matplotlib.pyplot as plt
+import keras
 import pandas as pd
 from PIL import Image
 import tensorflow_addons as tfa
@@ -103,10 +104,8 @@ class NeuralNetwork:
             batch_size=6,
             epochs=100,
             callbacks=[
-                # keras.callbacks.LearningRateScheduler(lr_scheduler),
-                # LrHistory(),
-                tfa.callbacks.TQDMProgressBar(),
-                # keras_utils.ModelSaveCallback(model_filename)
+                keras.callbacks.ModelCheckpoint('model_checkpoint', save_freq=20),
+                tfa.callbacks.TQDMProgressBar()
             ],
             validation_data=(self.x_test, self.y_test),
             shuffle=True,
@@ -115,7 +114,10 @@ class NeuralNetwork:
         )
 
 
-if __name__ == "__main__":
-    nn = NeuralNetwork()
-    nn.pre_process() #carregar inputs
-    nn.train_model() # obs.: já invoca o compile model em seu body
+def execute_model():
+    if __name__ == "__main__":
+        nn = NeuralNetwork()
+        nn.pre_process() #carregar inputs
+        nn.train_model() # obs.: já invoca o compile model em seu body
+
+execute_model()
