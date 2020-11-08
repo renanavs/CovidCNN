@@ -134,8 +134,8 @@ class NeuralNetwork:
 
         model.fit(
             self.x_train, self.y_train,
-            batch_size=16,
-            epochs=50,
+            batch_size=11,
+            epochs=100,
             callbacks=[
                 keras.callbacks.ModelCheckpoint('model_checkpoint', save_weights_only=True, save_freq=20),
                 tfa.callbacks.TQDMProgressBar()
@@ -148,19 +148,19 @@ class NeuralNetwork:
         # model.save('my_model.h5')
 
 
-def execute_model():
-    neural_net = NeuralNetwork()
+def execute_model(neural_net):
+    neural_net
     neural_net.pre_process()  # carregar inputs
     neural_net.compile_model()
     neural_net.train_model()  # obs.: já invoca o compile model em seu body[
     print("evaluate model: ")
     neural_net.evaluate_model()
     print("predict test")
-    neural_net.predict_model("01E392EE-69F9-4E33-BFCE-E5C968654078.jpeg") # 1
-    neural_net.predict_model("IM-0001-0001.jpeg") # 0
-    neural_net.predict_model("NORMAL2-IM-0073-0001.jpeg") # 0
-    neural_net.predict_model("IMG-COVID-00014.jpg") # 1
+    neural_net.predict_model("01E392EE-69F9-4E33-BFCE-E5C968654078.jpeg") # POSITIVO
+    neural_net.predict_model("IM-0001-0001.jpeg")  # NEGATIVO
+    neural_net.predict_model("NORMAL2-IM-0073-0001.jpeg")  # NEGATIVO
+    neural_net.predict_model("IMG-COVID-00014.jpg")  # POSITIVO
 
 
-if __name__ == "__main__":
-    execute_model()
+nn = NeuralNetwork()
+execute_model(nn)
