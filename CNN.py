@@ -23,7 +23,7 @@ class NeuralNetwork:
         self.y_test = []
         self.y_train = []
         self.NUM_CLASSES = 2  # POSITIVO, NEGATIVO
-        self.learning_rate = 5e-2  # taxa de aprendizagem constante = 0.05
+        self.learning_rate = 1e-5 # taxa de aprendizagem constante = 0.05
         self.dataset_result = []
         self.expected_results = []
         self.classes = ['Positivo', 'Negativo']
