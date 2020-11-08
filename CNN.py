@@ -131,7 +131,7 @@ class NeuralNetwork:
             verbose=0,
             initial_epoch=0
         )
-        # model.save('my_model.h5')
+        model.save('my_model.h5')
 
 
 def execute_model(neural_net):
@@ -144,7 +144,7 @@ def execute_model(neural_net):
     print("predict test")
     neural_net.predict_model("01E392EE-69F9-4E33-BFCE-E5C968654078.jpeg") # POSITIVO
     neural_net.predict_model("IM-0001-0001.jpeg")  # NEGATIVO
-    neural_net.predict_model("NORMAL2-IM-0073-0001.jpeg")  # NEGATIVO
+    neural_net.predict_model("NORMAL2-IM-0072-0001.jpeg")  # NEGATIVO
     neural_net.predict_model("IMG-COVID-00014.jpg")  # POSITIVO
 
 
